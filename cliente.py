@@ -77,11 +77,13 @@ class Tabuleiro:
         self.tabuleiro = [0]*8
         return (self.tabuleiro).insert(posicao,1)
 
-    def Imprime(self):
+    def Imprime(self,tabuleiro=None):
+        if not tabuleiro:
+            tabuleiro = self.tabuleiro
         for x in xrange(0,3):
             for y in xrange(0,3):
                 #print "comparando posicao %d com 1" % ((x*3)+y)
-                if self.tabuleiro[(x*3)+y] == 1:
+                if tabuleiro[(x*3)+y] == 1:
                     sys.stdout.write("_X|")
                 else:
                     sys.stdout.write("__|")
@@ -94,26 +96,23 @@ def le(tab,udp,dest):
         c = ord(getch())
         c = ord(getch())
         if c == 65:
-            #print "cima"
             udp.sendto(str(1), dest)
-            tab.Movimenta(1)
+            #tab.Movimenta(1)
         elif c == 67:
-            #print "direita"
             udp.sendto(str(3), dest)
-            tab.Movimenta(3)
+            #tab.Movimenta(3)
         elif c == 66:
-            #print "baixo"
             udp.sendto(str(2), dest)
-            tab.Movimenta(2)
+            #tab.Movimenta(2)
         elif c == 68:
-            #print "esquerda"
             udp.sendto(str(4), dest)
-            tab.Movimenta(4)
+            #tab.Movimenta(4)
     elif c == 3:
         print "CTRL + C"
         sys.exit()
     elif c == 13:
-        print "enviando posicao: %d" % tab.posicao
+        #print "enviando posicao: %d" % tab.posicao
+        udp.sendto(str(13), dest)
     else:
         print "%d" % c
 
@@ -133,20 +132,23 @@ def main():
 
     msg = "teste"
     try:
-        try:
-            udp.sendto(str(1), dest)
-        except Exception as e:
-            print e
-            sys.exit()    
+        #try:
+        #    udp.sendto(str(1), dest)
+        #except Exception as e:
+        #    print e
+        #    sys.exit()    
 
-        true = True
         print "Vai:"
 
         while (1):
             le(tab,udp,dest)
             os.system("clear")
-            
-            #tab.Imprime()
+            msg, cliente = udp.recvfrom(1024)
+            #print msg, " ", cliente
+            msg = msg.split(" ")
+            msg = [int(m) for m in msg]
+            tab.Imprime(msg)
+
     except KeyboardInterrupt:
         udp.sendto('-1', dest)
         udp.close()
