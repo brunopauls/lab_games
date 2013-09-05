@@ -72,7 +72,6 @@ class Tabuleiro:
 
         return self.posicao
 
-<<<<<<< HEAD
 
     def AddPosicao(self,posicao):
         self.tabuleiro = [0]*8
@@ -90,11 +89,6 @@ class Tabuleiro:
 
 
 def le(tab,udp,dest):
-
-=======
-def le():
-    tab = Tabuleiro()
->>>>>>> d113938d62c1813babea7ebd321a369d3d7eeba4
     c = ord(getch())
     if c == 27:
         c = ord(getch())
@@ -125,10 +119,7 @@ def le():
 
 getch = _Getch()
 def main(): 
-<<<<<<< HEAD
     tab = Tabuleiro()
-=======
->>>>>>> d113938d62c1813babea7ebd321a369d3d7eeba4
     #getch = _GetchUnix()
     if len(sys.argv) < 3:
         print 'Uso correto: cliente <servidor> <porta>'
@@ -152,16 +143,10 @@ def main():
         print "Vai:"
 
         while (1):
-<<<<<<< HEAD
             le(tab,udp,dest)
             os.system("clear")
             
             #tab.Imprime()
-
-
-=======
-            le()
->>>>>>> d113938d62c1813babea7ebd321a369d3d7eeba4
     except KeyboardInterrupt:
         udp.sendto('-1', dest)
         udp.close()
