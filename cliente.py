@@ -6,7 +6,6 @@ import sys
 import contextlib
 import termios
 
-
 class _Getch:
     """Gets a single character from standard input.  Does not echo to the
 screen."""
@@ -17,7 +16,6 @@ screen."""
             self.impl = _GetchUnix()
 
     def __call__(self): return self.impl()
-
 
 class _GetchUnix:
     def __init__(self):
@@ -33,7 +31,6 @@ class _GetchUnix:
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
-
 
 class _GetchWindows:
     def __init__(self):
@@ -73,7 +70,6 @@ class Tabuleiro:
 
         print self.posicao
 
-
 def le():
     tab = Tabuleiro()
     c = ord(getch())
@@ -99,18 +95,11 @@ def le():
     else:
 	print "%d" % c
 
-
 getch = _Getch()
-
-
 def main(): 
-
     #getch = _GetchUnix()
-
-
     if len(sys.argv) < 3:
         print 'Uso correto: cliente <servidor> <porta>'
-
         sys.exit()
 
     # Definição dos parametros para a comunicação
@@ -123,12 +112,9 @@ def main():
     try:
         try:
             udp.sendto(str(1), dest)
-
         except Exception as e:
-
             print e
             sys.exit()    
-    
 
         true = True
         print "   |   |\n___|___|___\n   |   |\n___|___|___\n   |   |\n   |   |\n"
@@ -136,10 +122,7 @@ def main():
 
         while (1):
             le()
-
-
     except KeyboardInterrupt:
-
         udp.sendto('-1', dest)
         udp.close()
         sys.exit()
