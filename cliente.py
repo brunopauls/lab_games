@@ -45,66 +45,88 @@ class _GetchWindows:
 
 class Tabuleiro:
     posicao = 0
-    tabuleiro=[]
+    tabuleiro=[0]*8
+
     def Movimenta(self,x):
-        print "movimentou: %d" % x
+        #print "movimentou: %d" % x
         # cima
-        if x == 1:
-            pass
-            #posicao = 
+        if x == 1:  
+            self.posicao = ((self.posicao - 3) % 9)
         
         # baixo
         elif x == 2:
-            pass
-            #posicao = ((posicao + 3) % 9)
+            self.posicao = ((self.posicao + 3) % 9)
         
         # direita
         elif x == 3:
-            pass
-            #posicao = 
-        
+            if ((self.posicao + 1) % 3) == 0:
+                self.posicao -= 2 
+            else:
+                self.posicao += 1
         #esquerda
         elif x == 4:
-            pass
-            #posicao = 
+            if ((self.posicao % 3) == 0):
+                self.posicao += 2 
+            else:
+                self.posicao -= 1
         
         else:
             print "movimentação errada"
 
-        print self.posicao
+        return self.posicao
 
 
-def le():
-    tab = Tabuleiro()
+    def AddPosicao(self,posicao):
+        self.tabuleiro = [0]*8
+        return (self.tabuleiro).insert(posicao,1)
+
+    def Imprime(self):
+        for x in xrange(0,3):
+            for y in xrange(0,3):
+                #print "comparando posicao %d com 1" % ((x*3)+y)
+                if self.tabuleiro[(x*3)+y] == 1:
+                    sys.stdout.write("_X|")
+                else:
+                    sys.stdout.write("__|")
+            print
+
+
+def le(tab,udp,dest):
+
     c = ord(getch())
     if c == 27:
         c = ord(getch())
         c = ord(getch())
         if c == 65:
-            print "cima"
-            print ((7 + 3) % 9)
+            #print "cima"
+            udp.sendto(str(1), dest)
             tab.Movimenta(1)
         elif c == 67:
-            print "direita"
+            #print "direita"
+            udp.sendto(str(3), dest)
             tab.Movimenta(3)
         elif c == 66:
-            print "baixo"
+            #print "baixo"
+            udp.sendto(str(2), dest)
             tab.Movimenta(2)
         elif c == 68:
-            print "esquerda"
+            #print "esquerda"
+            udp.sendto(str(4), dest)
             tab.Movimenta(4)
     elif c == 3:
         print "CTRL + C"
-	sys.exit()
+        sys.exit()
+    elif c == 13:
+        print "enviando posicao: %d" % tab.posicao
     else:
-	print "%d" % c
+        print "%d" % c
 
 
 getch = _Getch()
 
 
 def main(): 
-
+    tab = Tabuleiro()
     #getch = _GetchUnix()
 
 
@@ -131,11 +153,13 @@ def main():
     
 
         true = True
-        print "   |   |\n___|___|___\n   |   |\n___|___|___\n   |   |\n   |   |\n"
         print "Vai:"
 
         while (1):
-            le()
+            le(tab,udp,dest)
+            os.system("clear")
+            
+            #tab.Imprime()
 
 
     except KeyboardInterrupt:
