@@ -40,6 +40,8 @@ class _GetchWindows:
         import msvcrt
         return msvcrt.getch()
 
+getch = _Getch()
+
 class Tabuleiro:
     posicao = 0
     tabuleiro=[0]*8
@@ -77,17 +79,38 @@ class Tabuleiro:
         self.tabuleiro = [0]*8
         return (self.tabuleiro).insert(posicao,1)
 
+
     def Imprime(self,tabuleiro=None):
-        if not tabuleiro:
-            tabuleiro = self.tabuleiro
-        for x in xrange(0,3):
-            for y in xrange(0,3):
-                #print "comparando posicao %d com 1" % ((x*3)+y)
-                if tabuleiro[(x*3)+y] == 1:
-                    sys.stdout.write("_X|")
-                else:
-                    sys.stdout.write("__|")
-            print
+        if tabuleiro:
+            self.tabuleiro = tabuleiro
+
+        sys.stdout.write(" _________________ \n|     |     |     |\n|  ")
+        self.ImprimeXouOouEspaco(0)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(1)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(2)
+        sys.stdout.write("  |\n|_____|_____|_____|\n|     |     |     |\n|  ")
+        self.ImprimeXouOouEspaco(3)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(4)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(5)
+        sys.stdout.write("  |\n|_____|_____|_____|\n|     |     |     |\n|  ")
+        self.ImprimeXouOouEspaco(6)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(7)
+        sys.stdout.write("  |  ")
+        self.ImprimeXouOouEspaco(8)
+        sys.stdout.write("  |\n|_____|_____|_____|\n")
+
+    def ImprimeXouOouEspaco(self,pos):
+        if(self.tabuleiro[pos] == 1):
+            sys.stdout.write("X")
+        elif(self.tabuleiro[pos] == 2):
+            sys.stdout.write("O")
+        else:
+            sys.stdout.write(" ")
 
 
 def le(tab,udp,dest):
@@ -97,29 +120,28 @@ def le(tab,udp,dest):
         c = ord(getch())
         if c == 65:
             udp.sendto(str(1), dest)
-            #tab.Movimenta(1)
+
         elif c == 67:
             udp.sendto(str(3), dest)
-            #tab.Movimenta(3)
+
         elif c == 66:
             udp.sendto(str(2), dest)
-            #tab.Movimenta(2)
+
         elif c == 68:
             udp.sendto(str(4), dest)
-            #tab.Movimenta(4)
+
     elif c == 3:
         print "CTRL + C"
         sys.exit()
     elif c == 13:
-        #print "enviando posicao: %d" % tab.posicao
         udp.sendto(str(13), dest)
+
     else:
         print "%d" % c
 
-getch = _Getch()
+
 def main(): 
     tab = Tabuleiro()
-    #getch = _GetchUnix()
     if len(sys.argv) < 3:
         print 'Uso correto: cliente <servidor> <porta>'
         sys.exit()
@@ -130,24 +152,41 @@ def main():
     udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     dest=(HOST, PORT)
 
-    msg = "teste"
     try:
-        #try:
-        #    udp.sendto(str(1), dest)
-        #except Exception as e:
-        #    print e
-        #    sys.exit()    
+        try:
+            udp.sendto(str("10"), dest)
+        except Exception as e:
+            print e
+            sys.exit()    
 
+        msg, cliente = udp.recvfrom(1024)
+        if msg == "11":
+            joga = True
+        elif msg == "12":
+            joga = False
         print "Vai:"
 
         while (1):
-            le(tab,udp,dest)
-            os.system("clear")
-            msg, cliente = udp.recvfrom(1024)
-            #print msg, " ", cliente
-            msg = msg.split(" ")
-            msg = [int(m) for m in msg]
-            tab.Imprime(msg)
+            while joga:
+                le(tab,udp,dest)
+                os.system("clear")
+                msg, cliente = udp.recvfrom(1024)
+                if msg == "12":
+                    joga = False
+                    break
+                msg = msg.split(" ")
+                msg = [int(m) for m in msg]
+                tab.Imprime(msg)
+
+            while not joga:
+                msg, cliente = udp.recvfrom(1024)
+                os.system("clear")
+                if msg == "11":
+                    joga = True
+                    break
+                msg = msg.split(" ")
+                msg = [int(m) for m in msg]
+                tab.Imprime(msg)
 
     except KeyboardInterrupt:
         udp.sendto('-1', dest)
