@@ -42,6 +42,27 @@ class _GetchWindows:
 
 getch = _Getch()
 
+
+class Cores:
+    HEADER = '\033[95m'
+    AZUL = '\033[94m'
+    VERDE = '\033[92m'
+    AMARELO = '\033[93m'
+    VERMELHO = '\033[91m'
+    ENDC = '\033[0m'
+    NORMAL = ''
+
+    @classmethod
+    def disable(self):
+        self.HEADER = ''
+        self.OKBLUE = ''
+        self.OKGREEN = ''
+        self.WARNING = ''
+        self.FAIL = ''
+        self.ENDC = ''
+
+
+
 class Tabuleiro:
     posicao = 0
     tabuleiro=[0]*8
@@ -131,7 +152,8 @@ def le(tab,udp,dest):
             udp.sendto(str(4), dest)
 
     elif c == 3:
-        print "CTRL + C"
+        print Cores.VERMELHO + "CTRL + C" + Cores.ENDC
+        Cores.disable()
         sys.exit()
     elif c == 13:
         udp.sendto(str(13), dest)
@@ -164,33 +186,41 @@ def main():
             joga = True
         elif msg == "12":
             joga = False
-        print "Vai:"
+        #print Cores.VERDE + "Vai:" + Cores.ENDC
 
         while (1):
+            # Jogador Ativo:
             while joga:
+                print Cores.VERDE + "Sua vez!" + Cores.ENDC
                 le(tab,udp,dest)
-                os.system("clear")
+                
                 msg, cliente = udp.recvfrom(1024)
                 if msg == "12":
                     joga = False
                     break
+                else:
+                    os.system("clear")
                 msg = msg.split(" ")
                 msg = [int(m) for m in msg]
                 tab.Imprime(msg)
 
+            # Jogador em espera:
             while not joga:
+                print Cores.AMARELO + "Espere" + Cores.ENDC
                 msg, cliente = udp.recvfrom(1024)
-                os.system("clear")
                 if msg == "11":
                     joga = True
                     break
+                else:
+                    os.system("clear")
                 msg = msg.split(" ")
                 msg = [int(m) for m in msg]
                 tab.Imprime(msg)
 
     except KeyboardInterrupt:
-        udp.sendto('-1', dest)
-        udp.close()
+        # Mandar msg de fim pro servidor!
+        print Cores.VERMELHO + "CTRL + C" + Cores.ENDC
+        Cores.disable()
         sys.exit()
 
 if __name__ == '__main__': main()
