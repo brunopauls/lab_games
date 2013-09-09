@@ -10,7 +10,9 @@ class Jogador:
 
 class Tabuleiro:
     posicao = 0
-    tabuleiro=[0]*8
+    tabuleiro=[0]*9
+    __tabuleiro=[0]*9
+
 
     def __init__(self, jogador1=None, jogador2=None):
         self.jogador_1 = jogador1
@@ -39,19 +41,26 @@ class Tabuleiro:
             else:
                 self.posicao -= 1
         elif x == 13:
-            print 'Adicionando jogada.'
+            self.FazerJogada()
             return True
         else:
             print "Movimentação errada"
         return False
 
-    def Zera(self,posicao):
+    def Jogada(self,posicao):
         if self.jogador_vez == self.jogador_1:
             X_O=1
         else:
             X_O=2
-        self.tabuleiro = [0]*8
-        return (self.tabuleiro).insert(posicao,X_O)
+
+        self.tabuleiro = [x for x in self.__tabuleiro]
+        self.tabuleiro[posicao] = X_O
+
+    def FazerJogada(self):
+        self.SalvaTabuleiro()
+
+    def SalvaTabuleiro(self):
+        self.__tabuleiro = self.tabuleiro
 
     def Imprime(self):
         sys.stdout.write(" _________________ \n|     |     |     |\n|  ")
@@ -157,7 +166,7 @@ def main():
             if campo.jogador_vez == cliente:
                 os.system('clear')
                 troca = campo.Movimenta(int(msg))
-                campo.Zera(campo.posicao)
+                campo.Jogada(campo.posicao)
                 campo.Imprime()
                 msg = ' '.join(str(e) for e in campo.tabuleiro)
                 udp.sendto(msg, campo.jogador_1)
