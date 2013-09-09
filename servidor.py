@@ -23,6 +23,7 @@ class Tabuleiro:
 
     def Movimenta(self,x):
         # cima
+        aux=0
         if x == 1:  
             self.posicao = ((self.posicao - 3) % 9)
         # baixo
@@ -41,8 +42,8 @@ class Tabuleiro:
             else:
                 self.posicao -= 1
         elif x == 13:
-            self.FazerJogada()
-            return True
+            if self.FazerJogada(): 
+                return True
         else:
             print "Movimentação errada"
         return False
@@ -52,12 +53,17 @@ class Tabuleiro:
             X_O=1
         else:
             X_O=2
-
         self.tabuleiro = [x for x in self.__tabuleiro]
         self.tabuleiro[posicao] = X_O
 
     def FazerJogada(self):
-        self.SalvaTabuleiro()
+        if not self.__tabuleiro[self.posicao] <> 0:
+            self.SalvaTabuleiro()
+            vitoria = self.ChecaVitoria()
+            return True
+        else:
+            return False
+
 
     def SalvaTabuleiro(self):
         self.__tabuleiro = self.tabuleiro
@@ -93,14 +99,15 @@ class Tabuleiro:
 
     #funcao q retorna 0 se ngm ganhou ainda, 1 se X ganhou e 2 se O ganhou
     def ChecaVitoria(self):
+        z=0
         for x in xrange(3):
-            z += self.ChecaLinha(x)
+            z+=self.ChecaLinha(x)
             if(z <> 0):
                 return z
-            z = self.ChecaColuna(x)
+            z=self.ChecaColuna(x)
             if(z <> 0):
                 return z
-        z = self.ChecaDiagonais()
+        return self.ChecaDiagonais()
         
     def ChecaLinha(self,linha):
         linha *= 3
@@ -108,11 +115,13 @@ class Tabuleiro:
             if(self.tabuleiro[linha] == self.tabuleiro[linha + 2] ):
                 return self.tabuleiro[linha]
         return 0
+
     def ChecaColuna(self,coluna):
         if(self.tabuleiro[coluna] == self.tabuleiro[coluna + 3]):
             if(self.tabuleiro[coluna] == self.tabuleiro[coluna + 6]):
                 return self.tabuleiro[coluna]
         return 0
+
     def ChecaDiagonais(self):
         if(self.tabuleiro[0] == self.tabuleiro[4]):
             if(self.tabuleiro[0] == self.tabuleiro[8]):
@@ -169,16 +178,17 @@ def main():
                 campo.Jogada(campo.posicao)
                 campo.Imprime()
                 msg = ' '.join(str(e) for e in campo.tabuleiro)
-                udp.sendto(msg, campo.jogador_1)
-                udp.sendto(msg, campo.jogador_2)
+                if not troca:
+                    udp.sendto(msg, campo.jogador_vez)
+                udp.sendto(msg, campo.jogador_espera)
                 if troca:
                     aux=campo.jogador_vez
                     campo.jogador_vez=campo.jogador_espera
                     campo.jogador_espera=aux
                     #Envia as mensagens de aviso
-                    udp.sendto('11', campo.jogador_vez)
                     udp.sendto('12', campo.jogador_espera)
-
+                    udp.sendto('11', campo.jogador_vez)
+                    
 
     except KeyboardInterrupt:
         udp.close()
