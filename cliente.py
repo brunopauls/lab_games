@@ -49,8 +49,11 @@ class Cores:
     VERDE = '\033[92m'
     AMARELO = '\033[93m'
     VERMELHO = '\033[91m'
+
+    FAZUL = '\033[44m'
+
+
     ENDC = '\033[0m'
-    NORMAL = ''
 
     @classmethod
     def disable(self):
@@ -169,8 +172,40 @@ def le(tab,udp,dest):
     else:
         print "%d" % c
 
+def ImprimeMenuNovoJogo(tab,tabuleiro,opcao):
+    os.system("clear")
+    tab.Imprime(tabuleiro)
+    if opcao == 1:
+        print "\n\n"
+        print Cores.FAZUL + "JOGAR NOVAMENTE" + Cores.ENDC
+        print "SAIR"
+    elif opcao == 2:
+        print "\n\n"
+        print "JOGAR NOVAMENTE"
+        print Cores.FAZUL + "SAIR" + Cores.ENDC
 
-def main(): 
+def Opcao(tab,tabuleiro):
+    opcao = 1
+    ImprimeMenuNovoJogo(tab,tabuleiro,opcao)
+
+    while(1):
+        c = ord(getch())
+        if c == 27:
+            c = ord(getch())
+            c = ord(getch())
+            if c == 65:
+                opcao = 1
+                ImprimeMenuNovoJogo(tab,tabuleiro,opcao)
+            elif c == 66:
+                opcao = 2
+                ImprimeMenuNovoJogo(tab,tabuleiro,opcao)
+        elif c == 13:
+            if opcao == 1:
+                main()
+            elif opcao == 2:
+                sys.exit()
+
+def main():
     tab = Tabuleiro()
     if len(sys.argv) < 2:
         print 'Uso correto: cliente <servidor>'
@@ -181,7 +216,6 @@ def main():
     PORT = 15000       # Porta que o Servidor esta
     udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     dest=(HOST, PORT)
-
 
     try:
         udp.settimeout(1);
@@ -232,12 +266,13 @@ def main():
                     break
                 elif msg == "21":
                     print Cores.AZUL + "GANHEEEMO!" + Cores.ENDC
-                    sys.exit()
+                    Opcao(tab,ultimo)
                 else:
                     os.system("clear")
                 msg = msg.split(" ")
                 msg = [int(m) for m in msg]
                 tab.Imprime(msg)
+                ultimo = [int(m) for m in msg]
 
             # Jogador em espera:
             while not joga:
@@ -249,12 +284,13 @@ def main():
                     break
                 elif msg == "22":
                     print Cores.VERMELHO + "PERDEU!" + Cores.ENDC
-                    sys.exit()
+                    Opcao(tab,ultimo)
                 else:
                     os.system("clear")
                 msg = msg.split(" ")
                 msg = [int(m) for m in msg]
                 tab.Imprime(msg)
+                ultimo = [int(m) for m in msg]
 
     except KeyboardInterrupt:
         # Mandar msg de fim pro servidor!
