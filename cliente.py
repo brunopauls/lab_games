@@ -126,10 +126,18 @@ class Tabuleiro:
         sys.stdout.write("  |\n|_____|_____|_____|\n")
 
     def ImprimeXouOouEspaco(self,pos):
+        # X estático
         if(self.tabuleiro[pos] == 1):
             sys.stdout.write("X")
+        # 0 estático
         elif(self.tabuleiro[pos] == 2):
             sys.stdout.write("O")
+        # X movimentando
+        elif(self.tabuleiro[pos] == 3):
+            sys.stdout.write("%sX%s" % (Cores.VERMELHO,Cores.ENDC))
+        # 0 movimentando
+        elif(self.tabuleiro[pos] == 4):
+            sys.stdout.write("%sO%s" % (Cores.VERDE,Cores.ENDC))
         else:
             sys.stdout.write(" ")
 
@@ -198,6 +206,9 @@ def main():
                 if msg == "12":
                     joga = False
                     break
+                elif msg == "21"
+                    print Cores.AZUL + "GANHEEEMO!" + Cores.ENDC
+                    sys.exit()
                 else:
                     os.system("clear")
                 msg = msg.split(" ")
@@ -211,6 +222,9 @@ def main():
                 if msg == "11":
                     joga = True
                     break
+                elif msg == "22"
+                    print Cores.VERMELHO + "PERDEU!" + Cores.ENDC
+                    sys.exit()
                 else:
                     os.system("clear")
                 msg = msg.split(" ")
