@@ -1,8 +1,28 @@
 #!/usr/bin/python
 #coding=utf-8
 import socket
+import thread
 import sys
 import os
+
+class UDPSocket:
+    def __init__(self, HOST, PORT):
+        self.__PORT=PORT
+        self.__HOST=HOST
+        self.__socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.__socket.bind((HOST, PORT))
+
+    def EnviaMensagem(self, mensagem, endereco):
+        self.__socket.sendto(mensagem, endereco)
+
+    def RecebeMensagem(self,):
+        return self.__socket.recvfrom(1024)
+
+    def RetornaPorta(self):
+        return self.__PORT
+
+    def PegaHostPort(self):
+        return (self.__HOST, self.__PORT)
 
 class Tabuleiro:
     posicao = 0
@@ -119,74 +139,80 @@ class Tabuleiro:
                 return self.tabuleiro[4]
         return 0
 
+def ConfereVazio(porta):
+    return salas[str(porta)] <> 0
 
+def TemVazio():
+    while (1):
+        print salas
+        for porta in salas:
+            if salas[porta]<>1:
+                return int(porta)
+
+def Jogo(host, porta, jogador_1, jogador_2):
+    salas[str(porta)]=1
+    #Cria um socket para a conexao
+    udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp.bind((host, porta))
+
+    campo = Tabuleiro(jogador_1, jogador_2)
+    #Envia as mensagens de aviso
+    campo.EnviaJogadorVez(udp)
+    print 'Aguardando o inicio da partida...'
+
+    while(1):
+        msg, cliente = udp.recvfrom(1024)
+        if campo.jogador_vez == cliente:
+            troca = campo.Movimenta(int(msg))
+            if campo.ganhador <> 0:
+                campo.EnviaVitoria(udp)
+                salas[str(PORT)]=0
+                udp.close()
+                sys.exit()
+            else:
+                campo.EnviaTabuleiro(udp, campo.jogador_espera)
+                if not troca:
+                    campo.EnviaTabuleiro(udp, campo.jogador_vez)
+                else:
+                    campo.TrocaJogadores()
+                    campo.EnviaJogadorVez(udp)
+
+salas={ '15001': 0,
+        '15002': 0,
+        '15003': 0,
+        '15004': 0,
+        '15005': 0,
+        '15006': 0,
+        '15007': 0,
+        '15008': 0,
+        '15009': 0,
+        '15010': 0,
+}
 
 def main():
-    """
-    if len(sys.argv) < 2:
-        print 'Uso correto: servidor <porta>'
-        sys.exit()
-    """
-    HOST=''
-    PORT=15000
-    udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    orig=(HOST, PORT)
-    udp.bind(orig)
-    doisJogadores=False
+    socket = UDPSocket('', 15000)
+    PORTA_atual = socket.RetornaPorta()
+
     try:
         while(1):
             print 'Aguardando jogador 1...'
             while(1):
-                msg, cliente = udp.recvfrom(1024)
-                print 'Jogandor 1: ', cliente, msg
-                if msg == "10":
-                    jogador_1 = cliente
-                    udp.sendto('14', jogador_1)
+                mensagem, jogador_1 = socket.RecebeMensagem()
+                if mensagem == "10":
+                    socket.EnviaMensagem('14', jogador_1)
                     break
-            
             print 'Aguardando jogador 2...'
             while(1):
-                msg, cliente = udp.recvfrom(1024)
-                print 'Jogandor 2: ', cliente, msg
-                if msg == "10":
-                    if not cliente == jogador_1:
-                        jogador_2 = cliente
-                        udp.sendto('14', jogador_2)
+                mensagem, jogador_2 = socket.RecebeMensagem()
+                if mensagem == "10":
+                    if not jogador_2 == jogador_1:
+                        socket.EnviaMensagem('14', jogador_2)
                         break
+            PORTA_atual += 1
+            if PORTA_atual > socket.RetornaPorta()+10 or ConfereVazio(PORTA_atual):
+                PORTA_atual = TemVazio()
 
-            PORT += 1
-            if PORT > 15003:
-                print 'Acabou espaço na memoria! :-)'
-                udp.close()
-                sys.exit()
-
-            pid = os.fork()
-            if (pid == 0):
-                udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                orig=(HOST, PORT)
-                udp.bind(orig)
-
-                campo = Tabuleiro(jogador_1, jogador_2)
-                #Envia as mensagens de aviso
-                campo.EnviaJogadorVez(udp)
-                print 'Aguardando o inicio da partida...'
-
-                while(1):
-                    msg, cliente = udp.recvfrom(1024)
-                    if campo.jogador_vez == cliente:
-                        troca = campo.Movimenta(int(msg))
-                        if campo.ganhador <> 0:
-                            campo.EnviaVitoria(udp)
-                            udp.close()
-                            sys.exit()
-                        else:
-                            campo.EnviaTabuleiro(udp, campo.jogador_espera)
-                            if not troca:
-                                campo.EnviaTabuleiro(udp, campo.jogador_vez)
-                            else:
-                                campo.TrocaJogadores()
-                                campo.EnviaJogadorVez(udp)
-
+            thread.start_new_thread(Jogo, (socket.PegaHostPort, PORTA_atual, jogador_1, jogador_2))
 
     except KeyboardInterrupt:
         udp.close()
