@@ -206,7 +206,7 @@ def main():
                 if msg == "12":
                     joga = False
                     break
-                elif msg == "21"
+                elif msg == "21":
                     print Cores.AZUL + "GANHEEEMO!" + Cores.ENDC
                     sys.exit()
                 else:
@@ -222,7 +222,7 @@ def main():
                 if msg == "11":
                     joga = True
                     break
-                elif msg == "22"
+                elif msg == "22":
                     print Cores.VERMELHO + "PERDEU!" + Cores.ENDC
                     sys.exit()
                 else:
