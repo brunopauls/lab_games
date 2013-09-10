@@ -4,22 +4,15 @@ import socket
 import sys
 import os
 
-class Jogador:
-    def __init__(self, dados):
-        self.infos=dados
-
 class Tabuleiro:
     posicao = 0
+    ganhador = 0
     tabuleiro=[0]*9
     __tabuleiro=[0]*9
 
-
-    def __init__(self, jogador1=None, jogador2=None):
-        self.jogador_1 = jogador1
-        self.jogador_2 = jogador2
-
-        self.jogador_vez = jogador1
-        self.jogador_espera = jogador2
+    def __init__(self, jogador1, jogador2):
+        self.jogador_1 = self.jogador_vez = jogador1
+        self.jogador_2 = self.jogador_espera = jogador2
 
     def Movimenta(self,x):
         # cima
@@ -42,7 +35,7 @@ class Tabuleiro:
             else:
                 self.posicao -= 1
         elif x == 13:
-            if self.FazerJogada(): 
+            if self.DefinirJogada(): 
                 return True
         else:
             print "Movimentação errada"
@@ -50,23 +43,31 @@ class Tabuleiro:
 
     def Jogada(self,posicao):
         if self.jogador_vez == self.jogador_1:
-            X_O=1
+            X_O=3
         else:
-            X_O=2
+            X_O=4
         self.tabuleiro = [x for x in self.__tabuleiro]
         self.tabuleiro[posicao] = X_O
 
-    def FazerJogada(self):
+    def DefinirJogada(self):
         if not self.__tabuleiro[self.posicao] <> 0:
             self.SalvaTabuleiro()
-            vitoria = self.ChecaVitoria()
+            if self.ChecaVitoria() <> 0:
+                self.ganhador = True
             return True
         else:
             return False
 
-
     def SalvaTabuleiro(self):
+        if self.jogador_vez == self.jogador_1:
+            self.tabuleiro[self.posicao] = 1
+        else:
+            self.tabuleiro[self.posicao] = 2
+
         self.__tabuleiro = self.tabuleiro
+
+    def PegaTabuleiro(self):
+        return ' '.join(str(e) for e in self.tabuleiro)
 
     def Imprime(self):
         sys.stdout.write(" _________________ \n|     |     |     |\n|  ")
@@ -144,26 +145,22 @@ def main():
     udp.bind(orig)
     doisJogadores=False
     try:
-        
         while(not doisJogadores):
             print 'Aguardando jogador 1...'
             while(1):
                 msg, cliente = udp.recvfrom(1024)
                 if msg == "10":
-                    j1 = Jogador(cliente)
+                    jogador_1 = cliente
                     break
-            
             print 'Aguardando jogador 2...'
             while(1):
                 msg, cliente = udp.recvfrom(1024)
                 if msg == "10":
-                    j2 = Jogador(cliente)
+                    jogador_2 = cliente
                     break
-            
             doisJogadores=True
-        
 
-        campo = Tabuleiro(j1.infos, j2.infos)
+        campo = Tabuleiro(jogador_1, jogador_2)
 
         #Envia as mensagens de aviso
         udp.sendto('11', campo.jogador_vez)
@@ -176,19 +173,23 @@ def main():
                 os.system('clear')
                 troca = campo.Movimenta(int(msg))
                 campo.Jogada(campo.posicao)
+
                 campo.Imprime()
-                msg = ' '.join(str(e) for e in campo.tabuleiro)
-                if not troca:
-                    udp.sendto(msg, campo.jogador_vez)
-                udp.sendto(msg, campo.jogador_espera)
-                if troca:
-                    aux=campo.jogador_vez
-                    campo.jogador_vez=campo.jogador_espera
-                    campo.jogador_espera=aux
-                    #Envia as mensagens de aviso
-                    udp.sendto('12', campo.jogador_espera)
-                    udp.sendto('11', campo.jogador_vez)
-                    
+
+                if campo.ganhador <> 0:
+                    udp.sendto('21', campo.jogador_vez)
+                    udp.sendto('22', campo.jogador_espera)
+                else:
+                    if not troca:
+                        udp.sendto(campo.PegaTabuleiro(), campo.jogador_vez)
+                    udp.sendto(campo.PegaTabuleiro(), campo.jogador_espera)
+                    if troca:
+                        aux=campo.jogador_vez
+                        campo.jogador_vez = campo.jogador_espera
+                        campo.jogador_espera=aux
+                        #Envia as mensagens de aviso
+                        udp.sendto('12', campo.jogador_espera)
+                        udp.sendto('11', campo.jogador_vez)
 
     except KeyboardInterrupt:
         udp.close()
