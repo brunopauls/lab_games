@@ -172,34 +172,58 @@ def le(tab,udp,dest):
 
 def main(): 
     tab = Tabuleiro()
-    if len(sys.argv) < 3:
-        print 'Uso correto: cliente <servidor> <porta>'
+    if len(sys.argv) < 2:
+        print 'Uso correto: cliente <servidor>'
         sys.exit()
 
     # Definição dos parametros para a comunicação
-    HOST = sys.argv[1]          # Endereco IP do Servidor
-    PORT = int(sys.argv[2])     # Porta que o Servidor esta
+    HOST = sys.argv[1] # Endereco IP do Servidor
+    PORT = 15000       # Porta que o Servidor esta
     udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     dest=(HOST, PORT)
 
+
     try:
+        udp.settimeout(1);
         try:
             udp.sendto(str("10"), dest)
         except Exception as e:
             print e
             sys.exit()    
 
-        msg, cliente = udp.recvfrom(1024)
+        timeout = True
+        while(timeout):
+            try:
+                timeout = False
+                msg, cliente = udp.recvfrom(1024)
+                udp.settimeout(None)
+            except Exception as e:
+                print e
+                udp.sendto(str("10"), dest)
+                timeout = True
+            else:
+                print "Desabilitou timeout"
+                udp.settimeout(None)
+
+        print cliente
+
+        if msg == "14":
+            print "Esperando inicio do jogo"
+            msg, cliente = udp.recvfrom(1024)
+
+
+        print cliente
+
+        dest=cliente
         if msg == "11":
             joga = True
         elif msg == "12":
             joga = False
-        #print Cores.VERDE + "Vai:" + Cores.ENDC
 
         while (1):
             # Jogador Ativo:
             while joga:
-                print Cores.VERDE + "Sua vez!" + Cores.ENDC
+                print Cores.VERDE + "Sua vez!" + Cores.ENDC + str(dest)
                 le(tab,udp,dest)
                 
                 msg, cliente = udp.recvfrom(1024)
@@ -217,8 +241,9 @@ def main():
 
             # Jogador em espera:
             while not joga:
-                print Cores.AMARELO + "Espere" + Cores.ENDC
+                print Cores.AMARELO + "Espere" + Cores.ENDC + str(dest)
                 msg, cliente = udp.recvfrom(1024)
+                print msg
                 if msg == "11":
                     joga = True
                     break
