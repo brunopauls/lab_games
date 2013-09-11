@@ -12,6 +12,9 @@ class UDPSocket:
         self.__socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.__socket.bind((HOST, PORT))
 
+    def EncerraConexao(self):
+        self.__socket.close()
+
     def EnviaMensagem(self, mensagem, endereco):
         self.__socket.sendto(mensagem, endereco)
 
@@ -21,8 +24,8 @@ class UDPSocket:
     def RetornaPorta(self):
         return self.__PORT
 
-    def PegaHostPort(self):
-        return (self.__HOST, self.__PORT)
+    def RetornaHost(self):
+        return self.__HOST
 
 class Tabuleiro:
     posicao = 0
@@ -139,17 +142,7 @@ class Tabuleiro:
                 return self.tabuleiro[4]
         return 0
 
-def ConfereVazio(porta):
-    return salas[str(porta)] <> 0
-
-def TemVazio():
-    while (1):
-        print salas
-        for porta in salas:
-            if salas[porta]<>1:
-                return int(porta)
-
-def Jogo(host, porta, jogador_1, jogador_2):
+def JogoDaVelha(host, porta, jogador_1, jogador_2):
     salas[str(porta)]=1
     #Cria um socket para a conexao
     udp=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -158,7 +151,6 @@ def Jogo(host, porta, jogador_1, jogador_2):
     campo = Tabuleiro(jogador_1, jogador_2)
     #Envia as mensagens de aviso
     campo.EnviaJogadorVez(udp)
-    print 'Aguardando o inicio da partida...'
 
     while(1):
         msg, cliente = udp.recvfrom(1024)
@@ -166,7 +158,7 @@ def Jogo(host, porta, jogador_1, jogador_2):
             troca = campo.Movimenta(int(msg))
             if campo.ganhador <> 0:
                 campo.EnviaVitoria(udp)
-                salas[str(PORT)]=0
+                salas[str(porta)]=0
                 udp.close()
                 sys.exit()
             else:
@@ -176,6 +168,16 @@ def Jogo(host, porta, jogador_1, jogador_2):
                 else:
                     campo.TrocaJogadores()
                     campo.EnviaJogadorVez(udp)
+
+def ConfereVazio(porta):
+    return salas[str(porta)] <> 0
+
+def TemVazio():
+    while (1):
+        print salas
+        for porta in salas:
+            if salas[porta]<>1:
+                return int(porta)
 
 salas={ '15001': 0,
         '15002': 0,
@@ -191,7 +193,8 @@ salas={ '15001': 0,
 
 def main():
     socket = UDPSocket('', 15000)
-    PORTA_atual = socket.RetornaPorta()
+    PORTA_disponivel = socket.RetornaPorta()
+    HOST = socket.RetornaHost()
 
     try:
         while(1):
@@ -208,14 +211,12 @@ def main():
                     if not jogador_2 == jogador_1:
                         socket.EnviaMensagem('14', jogador_2)
                         break
-            PORTA_atual += 1
-            if PORTA_atual > socket.RetornaPorta()+10 or ConfereVazio(PORTA_atual):
-                PORTA_atual = TemVazio()
-
-            thread.start_new_thread(Jogo, (socket.PegaHostPort, PORTA_atual, jogador_1, jogador_2))
-
+            PORTA_disponivel += 1
+            if PORTA_disponivel > socket.RetornaPorta()+10 or ConfereVazio(PORTA_disponivel):
+                PORTA_disponivel = TemVazio()
+            thread.start_new_thread(JogoDaVelha, (HOST, PORTA_disponivel, jogador_1, jogador_2))
     except KeyboardInterrupt:
-        udp.close()
+        socket.EncerraConexao()
         sys.exit()
    
 if __name__ == '__main__': main()
