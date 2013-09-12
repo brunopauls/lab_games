@@ -46,6 +46,10 @@ class Tabuleiro:
         socket.sendto('21', self.jogador_vez)
         socket.sendto('22', self.jogador_espera)
 
+    def EnviaEmpate(self, socket):
+        socket.sendto('23', self.jogador_vez)
+        socket.sendto('23', self.jogador_espera)
+
     def EnviaJogadorVez(self, socket):
         socket.sendto('11', self.jogador_vez)
         socket.sendto('12', self.jogador_espera)
@@ -91,8 +95,9 @@ class Tabuleiro:
     def ValidaJogada(self):
         if not self.__tabuleiro[self.posicao] <> 0:
             self.SalvaTabuleiro()
-            if self.ChecaVitoria() <> 0:
-                self.ganhador = True
+            vitoria = self.ChecaVitoria()
+            if vitoria <> 0:
+                self.ganhador = vitoria
             return True
         else:
             return False
@@ -118,8 +123,12 @@ class Tabuleiro:
             z=self.ChecaColuna(x)
             if(z <> 0):
                 return z
-        return self.ChecaDiagonais()
-        
+        z=self.ChecaDiagonais()
+        if (z<>0):
+            return z
+        return self.ChecaEmpate()
+
+
     def ChecaLinha(self,linha):
         linha *= 3
         if(self.tabuleiro[linha] == self.tabuleiro[linha + 1]):
@@ -142,6 +151,12 @@ class Tabuleiro:
                 return self.tabuleiro[4]
         return 0
 
+    def ChecaEmpate(self):
+        for pos in self.__tabuleiro:
+            if pos == 0:
+                return 0
+        return 3
+
 def JogoDaVelha(host, porta, jogador_1, jogador_2):
     salas[str(porta)]=1
     #Cria um socket para a conexao
@@ -157,7 +172,10 @@ def JogoDaVelha(host, porta, jogador_1, jogador_2):
         if campo.jogador_vez == cliente:
             troca = campo.Movimenta(int(msg))
             if campo.ganhador <> 0:
-                campo.EnviaVitoria(udp)
+                if campo.ganhador == 3:
+                    campo.EnviaEmpate(udp)
+                else:
+                    campo.EnviaVitoria(udp)
                 salas[str(porta)]=0
                 udp.close()
                 sys.exit()
@@ -174,7 +192,6 @@ def ConfereVazio(porta):
 
 def TemVazio():
     while (1):
-        print salas
         for porta in salas:
             if salas[porta]<>1:
                 return int(porta)
