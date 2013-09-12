@@ -267,6 +267,9 @@ def main():
                 elif msg == "21":
                     print Cores.AZUL + "GANHEEEMO!" + Cores.ENDC
                     Opcao(tab,ultimo)
+                elif msg == "23":
+                    print Cores.AMARELO + "EMPATE" + Cores.ENDC
+                    Opcao(tab,ultimo)
                 else:
                     os.system("clear")
                 msg = msg.split(" ")
@@ -284,6 +287,9 @@ def main():
                     break
                 elif msg == "22":
                     print Cores.VERMELHO + "PERDEU!" + Cores.ENDC
+                    Opcao(tab,ultimo)
+                elif msg == "23":
+                    print Cores.AMARELO + "EMPATE" + Cores.ENDC
                     Opcao(tab,ultimo)
                 else:
                     os.system("clear")
