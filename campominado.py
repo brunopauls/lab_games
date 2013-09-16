@@ -5,81 +5,78 @@ import random
 import sys
 
 class Tabuleiro:
-	tabuleiro=[0]*225
 	bombas=[0]*21
 	ganhador=0
 
 	def __init__(self):
-		self.__tabuleiro = []
+		self.tabuleiro__ = []
+		self.tabuleiro = []
+
 		for i in range(0,15):
-			vetor=[0]*15
-			self.__tabuleiro.append(vetor)
+			vetor = [0]*15
+			vetor2 = [-1]*15
+			self.tabuleiro__.append(vetor)
+			self.tabuleiro.append(vetor2)
 
 	def CriaBombas(self):
-		self.bombas = sorted([x for x in random.sample(range(0, len(self.tabuleiro)), len(self.bombas))])
+		self.bombas = sorted([x for x in random.sample(range(0, 225), 21)])
 
 	def ColocaBombas(self):
 		for bomba in self.bombas:
-			self.tabuleiro[bomba] = 9
-		
-		contador=0
-		for i in range(0, 15):
-			for j in range(0,15):
-				self.__tabuleiro[i][j]=self.tabuleiro[contador]
-				contador+=1
+			self.tabuleiro__[(bomba/15)][(bomba%15)] = 9
 
 	def ArrumaCampo(self):
 		for i in range(0, 15):
 			for j in range(0, 15):
-				if self.__tabuleiro[i][j]==9:
+				if self.tabuleiro__[i][j]==9:
 					self.TrataBomba(i, j)
 
 	def TrataBomba(self, linha, coluna):
 		try:
-			if self.__tabuleiro[linha-1][coluna-1] <> 9:
-				self.__tabuleiro[linha-1][coluna-1]+=1
+			if self.tabuleiro__[linha-1][coluna-1] <> 9:
+				self.tabuleiro__[linha-1][coluna-1]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha-1][coluna] <> 9:
-				self.__tabuleiro[linha-1][coluna]+=1
+			if self.tabuleiro__[linha-1][coluna] <> 9:
+				self.tabuleiro__[linha-1][coluna]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha-1][coluna+1] <> 9:
-				self.__tabuleiro[linha-1][coluna+1]+=1
+			if self.tabuleiro__[linha-1][coluna+1] <> 9:
+				self.tabuleiro__[linha-1][coluna+1]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha][coluna-1] <> 9:
-				self.__tabuleiro[linha][coluna-1]+=1
+			if self.tabuleiro__[linha][coluna-1] <> 9:
+				self.tabuleiro__[linha][coluna-1]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha][coluna+1] <> 9:
-				self.__tabuleiro[linha][coluna+1]+=1
+			if self.tabuleiro__[linha][coluna+1] <> 9:
+				self.tabuleiro__[linha][coluna+1]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha+1][coluna-1] <> 9:
-				self.__tabuleiro[linha+1][coluna-1]+=1
+			if self.tabuleiro__[linha+1][coluna-1] <> 9:
+				self.tabuleiro__[linha+1][coluna-1]+=1
 		except:
 			pass
 		
 		try:
-			if self.__tabuleiro[linha+1][coluna] <> 9:
-				self.__tabuleiro[linha+1][coluna]+=1
+			if self.tabuleiro__[linha+1][coluna] <> 9:
+				self.tabuleiro__[linha+1][coluna]+=1
 		except:
 			pass
 
 		try:
-			if self.__tabuleiro[linha+1][coluna+1] <> 9:
-				self.__tabuleiro[linha+1][coluna+1]+=1
+			if self.tabuleiro__[linha+1][coluna+1] <> 9:
+				self.tabuleiro__[linha+1][coluna+1]+=1
 		except:
 			pass
 
@@ -92,9 +89,15 @@ class Tabuleiro:
 		print
 		print
 
-	def ImprimeCampo(self):
+	def ImprimeCampoRevelado(self):
 		print
-		for vetor in self.__tabuleiro:
+		for vetor in self.tabuleiro__:
+			print vetor
+		print
+
+	def ImprimeCampoNaoRevelado(self):
+		print
+		for vetor in self.tabuleiro:
 			print vetor
 		print
 
@@ -104,6 +107,7 @@ def main():
 	campo.CriaBombas()
 	campo.ColocaBombas()
 	campo.ArrumaCampo()
-	campo.ImprimeCampo()
+	campo.ImprimeCampoRevelado()
+	campo.ImprimeCampoNaoRevelado()
 
 if __name__ == '__main__': main()
