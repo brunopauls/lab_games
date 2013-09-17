@@ -36,13 +36,47 @@ class Tabuleiro:
 		for i in range(0, 15):
 			for j in range(0, 15):
 				if self.tabuleiro__[i][j]==9:
-					self.TrataBomba(i, j)
+					print 'ALO!'
+					print i, j
+					k=-1
+					while (k <= 1):
+						l=-1
+						while (l <= 1):
+							self.TrataBomba(i+k, j+l)
+							l+=1
+						k+=1
+					print 'TCHAU!'
+
+	def ChecaVazios(self, x, y):
+		try:
+			if (x < 0 or x > 14) or (y < 0 or y > 14):
+				return
+			if (self.tabuleiro__[x][y]==0) and (self.tabuleiro[x][y]<>0):
+				self.tabuleiro[x][y]=0
+			else:
+				return
+			self.ChecaVazios(x-1, y-1)
+			self.ChecaVazios(x-1, y)
+			self.ChecaVazios(x-1, y+1)
+			self.ChecaVazios(x, y-1)
+			self.ChecaVazios(x, y+1)
+			self.ChecaVazios(x+1, y-1)
+			self.ChecaVazios(x+1, y)
+			self.ChecaVazios(x+1, y+1)
+		except:
+			return
+
+
+	def AbreVazios(self, x, y):
+		self.ChecaVazios(x, y)
 
 	def Jogada(self, x, y):
-		self.tabuleiro[x][y]=self.tabuleiro__[x][y]
-		if self.tabuleiro__[x][y]==9:
+		if self.tabuleiro__[x][y]==0:
+			self.AbreVazios(x, y)
+		elif self.tabuleiro__[x][y]==9:
 			self.jogador_vez.bombas+=1
 			return False
+		self.tabuleiro[x][y]=self.tabuleiro__[x][y]
 		return True
 
 	def TrocaJogadores(self):
@@ -54,61 +88,12 @@ class Tabuleiro:
 
 	def TrataBomba(self, linha, coluna):
 		try:
-			if self.tabuleiro__[linha-1][coluna-1] <> 9:
-				self.tabuleiro__[linha-1][coluna-1]+=1
+			if not ((linha < 0 or linha > 14) or (coluna < 0 or coluna > 14)):
+				if self.tabuleiro__[linha][coluna] <> 9:
+					print linha, coluna
+					self.tabuleiro__[linha][coluna]+=1
 		except:
 			pass
-		
-		try:
-			if self.tabuleiro__[linha-1][coluna] <> 9:
-				self.tabuleiro__[linha-1][coluna]+=1
-		except:
-			pass
-		
-		try:
-			if self.tabuleiro__[linha-1][coluna+1] <> 9:
-				self.tabuleiro__[linha-1][coluna+1]+=1
-		except:
-			pass
-		
-		try:
-			if self.tabuleiro__[linha][coluna-1] <> 9:
-				self.tabuleiro__[linha][coluna-1]+=1
-		except:
-			pass
-		
-		try:
-			if self.tabuleiro__[linha][coluna+1] <> 9:
-				self.tabuleiro__[linha][coluna+1]+=1
-		except:
-			pass
-		
-		try:
-			if self.tabuleiro__[linha+1][coluna-1] <> 9:
-				self.tabuleiro__[linha+1][coluna-1]+=1
-		except:
-			pass
-		
-		try:
-			if self.tabuleiro__[linha+1][coluna] <> 9:
-				self.tabuleiro__[linha+1][coluna]+=1
-		except:
-			pass
-
-		try:
-			if self.tabuleiro__[linha+1][coluna+1] <> 9:
-				self.tabuleiro__[linha+1][coluna+1]+=1
-		except:
-			pass
-
-	def ImprimeCampoVetor(self):
-		print
-		for i in range(0, len(self.tabuleiro)):
-			if (i <> 0) and (i % 15 == 0):
-				print
-			sys.stdout.write(" %s " % str(self.tabuleiro[i]))
-		print
-		print
 
 	def ImprimeCampoRevelado(self):
 		print
@@ -130,6 +115,7 @@ def main():
 	campo.ArrumaCampo()
 	campo.ImprimeCampoRevelado()
 	campo.ImprimeCampoNaoRevelado()
+
 	while(1):
 		print vars(campo.jogador_vez)
 		print 'Posicao 1'
@@ -141,6 +127,6 @@ def main():
 			campo.TrocaJogadores()
 		campo.ImprimeCampoRevelado()
 		campo.ImprimeCampoNaoRevelado()
-
+	
 
 if __name__ == '__main__': main()
