@@ -129,7 +129,6 @@ def main():
 	campo.ImprimeCampoRevelado()
 	campo.ImprimeCampoNaoRevelado()
 
-	"""
 	while(1):
 		print '%s (Bombas: %s)' % (campo.jogador_vez.nome, str(campo.jogador_vez.bombas))
 		sys.stdout.write('Linha [0..14]: ')
@@ -141,6 +140,5 @@ def main():
 			campo.TrocaJogadores()
 		campo.ImprimeCampoRevelado()
 		campo.ImprimeCampoNaoRevelado()
-	"""
 
 if __name__ == '__main__': main()
