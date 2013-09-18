@@ -36,7 +36,6 @@ class Tabuleiro:
 		for i in range(0, 15):
 			for j in range(0, 15):
 				if self.tabuleiro__[i][j]==9:
-					print 'ALO!'
 					print i, j
 					k=-1
 					while (k <= 1):
@@ -45,7 +44,6 @@ class Tabuleiro:
 							self.TrataBomba(i+k, j+l)
 							l+=1
 						k+=1
-					print 'TCHAU!'
 
 	def ChecaVazios(self, x, y):
 		try:
@@ -54,6 +52,8 @@ class Tabuleiro:
 			if (self.tabuleiro__[x][y]==0) and (self.tabuleiro[x][y]<>0):
 				self.tabuleiro[x][y]=0
 			else:
+				if (self.tabuleiro__[x][y]>0) and (self.tabuleiro__[x][y]<9):
+					self.tabuleiro[x][y]=self.tabuleiro__[x][y]
 				return
 			self.ChecaVazios(x-1, y-1)
 			self.ChecaVazios(x-1, y)
@@ -74,6 +74,7 @@ class Tabuleiro:
 		if self.tabuleiro__[x][y]==0:
 			self.AbreVazios(x, y)
 		elif self.tabuleiro__[x][y]==9:
+			self.tabuleiro[x][y]=self.tabuleiro__[x][y]
 			self.jogador_vez.bombas+=1
 			return False
 		self.tabuleiro[x][y]=self.tabuleiro__[x][y]
@@ -104,7 +105,10 @@ class Tabuleiro:
 	def ImprimeCampoNaoRevelado(self):
 		print
 		for vetor in self.tabuleiro:
-			print vetor
+			for elemento in vetor:
+				string = str(elemento) if elemento<>-1 else ' '
+				sys.stdout.write(" %s " % string)
+			print
 		print
 
 
