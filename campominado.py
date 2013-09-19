@@ -3,6 +3,8 @@
 import random
 import sys
 
+import servidor
+
 class Jogador():
 	bombas=0
 	endereco=(0, 0)
