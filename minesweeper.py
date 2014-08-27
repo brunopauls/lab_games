@@ -16,9 +16,7 @@ class Minesweeper:
         # import images
         self.tile_plain = PhotoImage(file = "images/tile_plain.gif")
         self.tile_clicked = PhotoImage(file = "images/tile_clicked.gif")
-        self.tile_mine = PhotoImage(file = "images/tile_mine.gif")
         self.tile_flag = PhotoImage(file = "images/tile_flag.gif")
-        self.tile_wrong = PhotoImage(file = "images/tile_wrong.gif")
         self.tile_no = []
         for x in range(1, 9):
             self.tile_no.append(PhotoImage(file = "images/tile_"+str(x)+".gif"))
@@ -56,6 +54,7 @@ class Minesweeper:
                 mine=1
                 self.flags+=1
 
+            print x_coord, y_coord
             # 0 = Button widget
             # 1 = if a mine y/n (1/0)
             # 2 = state (0 = unclicked, 1 = clicked, 2 = flagged)
@@ -78,43 +77,37 @@ class Minesweeper:
 
         # lay buttons in grid
         for key in self.buttons:
-            self.buttons[key][0].grid( row = self.buttons[key][4][0], column = self.buttons[key][4][1] )
+            self.buttons[key][0].grid(row = self.buttons[key][4][0], column = self.buttons[key][4][1])
 
-        # find nearby mines and display number on tile
+        #Verifica bombas envolta
         for key in self.buttons:
             nearby_mines = 0
-            if self.check_for_mines(key-9):
+            if self.check_for_flags(key-SIZE+1):
                 nearby_mines += 1
-            if self.check_for_mines(key-10):
+            if self.check_for_flags(key-SIZE):
                 nearby_mines += 1
-            if self.check_for_mines(key-11):
+            if self.check_for_flags(key-SIZE-1):
                 nearby_mines += 1
-            if self.check_for_mines(key-1):
+            if self.check_for_flags(key-1):
                 nearby_mines += 1
-            if self.check_for_mines(key+1):
+            if self.check_for_flags(key+1):
                 nearby_mines += 1
-            if self.check_for_mines(key+9):
+            if self.check_for_flags(key+SIZE-1):
                 nearby_mines += 1
-            if self.check_for_mines(key+10):
+            if self.check_for_flags(key+SIZE):
                 nearby_mines += 1
-            if self.check_for_mines(key+11):
+            if self.check_for_flags(key+SIZE+1):
                 nearby_mines += 1
-            # store mine count in button data list
+            # Guarda valor no espaco
             self.buttons[key][5] = nearby_mines
-            #if self.buttons[key][1] != 1:
-            #    if nearby_mines != 0:
-            #        self.buttons[key][0].config(image = self.tile_no[nearby_mines-1])
 
-        #add mine and count at the end
+        #Adiciona labels para informação de flags
         self.label1 = Label(frame, text = "Jogador 1: "+str(self.correct_flags))
         self.label1.grid(row = 21, column = 0, columnspan = 5)
-
         self.label2 = Label(frame, text = "Jogador 2: "+str(self.correct_flags))
         self.label2.grid(row = 21, column = 5, columnspan = 10)
 
-    ## End of __init__
-
-    def check_for_mines(self, key):
+    def check_for_flags(self, key):
         try:
             if self.buttons[key][1] == 1:
                 return True
@@ -123,7 +116,6 @@ class Minesweeper:
 
     def lclicked_wrapper(self, x):
         return lambda Button: self.lclicked(self.buttons[x])
-
 
     # 0 = Button widget
     # 1 = if a mine y/n (1/0)
@@ -150,6 +142,8 @@ class Minesweeper:
             if button_data[2] != 1:
                 button_data[2] = 1
                 self.clicked += 1
+        if (self.correct_flags == (self.flags//2)+1):
+            self.victory()
 
     def check_tile(self, key, queue):
         try:
@@ -166,17 +160,16 @@ class Minesweeper:
 
     def clear_empty_tiles(self, main_key):
         queue = deque([main_key])
-
         while len(queue) != 0:
             key = queue.popleft()
-            self.check_tile(key-9, queue)      #top right
-            self.check_tile(key-10, queue)     #top middle
-            self.check_tile(key-11, queue)     #top left
+            self.check_tile(key-SIZE+1, queue) #top right
+            self.check_tile(key-SIZE, queue)   #top middle
+            self.check_tile(key-SIZE-1, queue) #top left
             self.check_tile(key-1, queue)      #left
             self.check_tile(key+1, queue)      #right
-            self.check_tile(key+9, queue)      #bottom right
-            self.check_tile(key+10, queue)     #bottom middle
-            self.check_tile(key+11, queue)     #bottom left
+            self.check_tile(key+SIZE+1, queue) #bottom right
+            self.check_tile(key+SIZE, queue)   #bottom middle
+            self.check_tile(key+SIZE+1, queue) #bottom left
     
     def gameover(self):
         tkMessageBox.showinfo("Game Over", "You Lose!")
